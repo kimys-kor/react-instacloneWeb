@@ -1,7 +1,31 @@
+import {
+  HashRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from "react-router-dom";
+import Home from "./screens/Home";
+import Login from "./screens/Login";
+import NotFound from "./screens/NotFound";
+
 function App() {
+  const isLoggedIn = true;
   return (
     <div>
-      <h1>앵녕하세요</h1>
+      <Router>
+        <Switch>
+          <Route path="/" exact>
+            {isLoggedIn ? <Home /> : <Login />}
+          </Route>
+          <Route path="/nomad-coders">
+            <h1>Nomad Coders</h1>
+            {!isLoggedIn ? "Plz. login" : null}
+          </Route>
+          <Route>
+            <NotFound />
+          </Route>
+        </Switch>
+      </Router>
     </div>
   );
 }
