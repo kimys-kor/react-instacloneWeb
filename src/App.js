@@ -1,33 +1,33 @@
-import {
-  HashRouter as Router,
-  Route,
-  Switch,
-  Redirect,
-} from "react-router-dom";
+import { useReactiveVar } from "@apollo/client";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { ThemeProvider } from "styled-components";
+import routes from "./routes";
+import { isLoggedInVar, darkModeVar } from "./screens/apollo";
 import Home from "./screens/Home";
 import Login from "./screens/Login";
 import NotFound from "./screens/NotFound";
+import SignUp from "./screens/SignUp";
+import { darkTheme, GlobalStyles, lightTheme } from "./styles";
 
 function App() {
-  const isLoggedIn = true;
+  const isLoggedIn = useReactiveVar(isLoggedInVar);
+  const darkMode = useReactiveVar(darkModeVar);
   return (
-    <div>
+    <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
+      <GlobalStyles />
       <Router>
         <Switch>
           <Route path="/" exact>
             {isLoggedIn ? <Home /> : <Login />}
           </Route>
-          <Route path="/nomad-coders">
-            <h1>Nomad Coders</h1>
-            {!isLoggedIn ? "Plz. login" : null}
-          </Route>
-          <Route>
-            <NotFound />
-          </Route>
+          {!isLoggedIn ? (
+            <Route path={routes.signUp}>
+              <SignUp />
+            </Route>
+          ) : null}
         </Switch>
       </Router>
-    </div>
+    </ThemeProvider>
   );
 }
-
 export default App;
