@@ -21,7 +21,7 @@ function App() {
           <GlobalStyles />
           <Router>
             <Switch>
-              <Route path="/" exact>
+              <Route path={routes.home} exact>
                 {isLoggedIn ? (
                   <Layout>
                     <Home />
@@ -35,6 +35,9 @@ function App() {
                   <SignUp />
                 </Route>
               ) : null}
+              <Route>
+                <NotFound />
+              </Route>
             </Switch>
           </Router>
         </ThemeProvider>

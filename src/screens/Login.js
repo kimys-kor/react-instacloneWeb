@@ -17,7 +17,6 @@ import Input from "../components/auth/Input";
 import Separator from "../components/auth/Separator";
 import PageTitle from "../components/PageTitle";
 import routes from "../routes";
-
 const FacebookLogin = styled.div`
   color: #385285;
   span {
@@ -25,7 +24,6 @@ const FacebookLogin = styled.div`
     font-weight: 600;
   }
 `;
-
 const Notification = styled.div`
   color: #2ecc71;
 `;
@@ -43,8 +41,6 @@ const LOGIN_MUTATION = gql`
 function Login() {
   const location = useLocation();
 
-  console.log(location);
-
   const {
     register,
     handleSubmit,
@@ -60,13 +56,12 @@ function Login() {
       password: location?.state?.password || "",
     },
   });
-
   const onCompleted = (data) => {
     const {
       login: { ok, error, token },
     } = data;
     if (!ok) {
-      setError("result", {
+      return setError("result", {
         message: error,
       });
     }
@@ -74,25 +69,21 @@ function Login() {
       logUserIn(token);
     }
   };
-
   const [login, { loading }] = useMutation(LOGIN_MUTATION, {
     onCompleted,
   });
-
   const onSubmitValid = (data) => {
     if (loading) {
       return;
     }
-    const { username, password } = data;
+    const { username, password } = getValues();
     login({
       variables: { username, password },
     });
   };
-
   const clearLoginError = () => {
     clearErrors("result");
   };
-
   return (
     <AuthLayout>
       <PageTitle title="Login" />
@@ -106,8 +97,8 @@ function Login() {
             ref={register({
               required: "Username is required",
               minLength: {
-                value: 2,
-                message: "Username should be longer than 2 chars.",
+                value: 3,
+                message: "Username should be longer than 3 chars.",
               },
             })}
             onChange={clearLoginError}
