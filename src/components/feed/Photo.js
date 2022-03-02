@@ -11,7 +11,6 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 import Avatar from "../Avatar";
 import { FatText } from "../shared";
-
 const TOGGLE_LIKE_MUTATION = gql`
   mutation toggleLike($id: Int!) {
     toggleLike(id: $id) {
@@ -20,7 +19,6 @@ const TOGGLE_LIKE_MUTATION = gql`
     }
   }
 `;
-
 const PhotoContainer = styled.div`
   background-color: white;
   border-radius: 4px;
@@ -34,20 +32,16 @@ const PhotoHeader = styled.div`
   align-items: center;
   border-bottom: 1px solid rgb(239, 239, 239);
 `;
-
 const Username = styled(FatText)`
   margin-left: 15px;
 `;
-
 const PhotoFile = styled.img`
   min-width: 100%;
   max-width: 100%;
 `;
-
 const PhotoData = styled.div`
   padding: 12px 15px;
 `;
-
 const PhotoActions = styled.div`
   display: flex;
   align-items: center;
@@ -60,22 +54,53 @@ const PhotoActions = styled.div`
     font-size: 20px;
   }
 `;
-
 const PhotoAction = styled.div`
   margin-right: 10px;
   cursor: pointer;
 `;
-
 const Likes = styled(FatText)`
   margin-top: 15px;
   display: block;
 `;
 
 function Photo({ id, user, file, isLiked, likes }) {
-  const [toggleLikeMutation, { loading }] = useMutation(TOGGLE_LIKE_MUTATION, {
+  const updateToggleLike = (cache, result) => {
+    const {
+      data: {
+        toggleLike: { ok },
+      },
+    } = result;
+
+    if (ok) {
+      const fragmentId = `Photo:${id}`;
+      const fragment = gql`
+        fragment BSName on Photo {
+          isLiked
+          likes
+        }
+      `;
+      const result = cache.readFragment({
+        id: fragmentId,
+        fragment,
+      });
+      if ("isLiked" in result && "likes" in result) {
+        const { isLiked: cacheIsLiked, likes: cacheLikes } = result;
+        cache.writeFragment({
+          id: fragmentId,
+          fragment,
+          data: {
+            isLiked: !cacheIsLiked,
+            likes: cacheIsLiked ? cacheLikes - 1 : cacheLikes + 1,
+          },
+        });
+      }
+    }
+  };
+  const [toggleLikeMutation] = useMutation(TOGGLE_LIKE_MUTATION, {
     variables: {
       id,
     },
+    update: updateToggleLike,
   });
   return (
     <PhotoContainer key={id}>
@@ -88,12 +113,10 @@ function Photo({ id, user, file, isLiked, likes }) {
         <PhotoActions>
           <div>
             <PhotoAction onClick={toggleLikeMutation}>
-              <span>
-                <FontAwesomeIcon
-                  style={{ color: isLiked ? "tomato" : "inherit" }}
-                  icon={isLiked ? SolidHeart : faHeart}
-                />
-              </span>
+              <FontAwesomeIcon
+                style={{ color: isLiked ? "tomato" : "inherit" }}
+                icon={isLiked ? SolidHeart : faHeart}
+              />
             </PhotoAction>
             <PhotoAction>
               <FontAwesomeIcon icon={faComment} />
@@ -111,7 +134,6 @@ function Photo({ id, user, file, isLiked, likes }) {
     </PhotoContainer>
   );
 }
-
 Photo.propTypes = {
   id: PropTypes.number.isRequired,
   user: PropTypes.shape({
