@@ -25,7 +25,7 @@ const FacebookLogin = styled.div`
   }
 `;
 const Notification = styled.div`
-  color: #2ecc71;
+  color: #2ecc81;
 `;
 
 const LOGIN_MUTATION = gql`
